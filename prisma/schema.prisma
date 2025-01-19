@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum CurrencyType {
+  ETH
+  POLYGON
+  BTC
+}
+
+model price {
+  id        String       @id @default(uuid())
+  type      CurrencyType
+  timestamp DateTime
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Float
+  trades    Int
+  createdAt DateTime     @default(now())
+
+  @@index([type, timestamp])
+}
+
+model alert {
+  id        String       @id @default(uuid())
+  type      CurrencyType
+  value     Float
+  email     String
+  createdAt DateTime     @default(now())
+}

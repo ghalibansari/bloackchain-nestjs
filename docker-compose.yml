@@ -1,0 +1,57 @@
+# Docker Compose version specification
+version: '3.9'
+
+# Define the services that make up the application
+services:
+  # Main application service
+  app:
+    # Build configuration for the app container
+    build:
+      context: . # Use current directory as build context
+      dockerfile: Dockerfile # Specify the Dockerfile to use
+    ports:
+      - '3000:3000' # Map container port 3000 to host port 3000
+    environment:
+      # Database connection string for PostgreSQL
+      DATABASE_URL: 'postgresql://postgres:postgres@postgres:5432/crypto_db'
+      # Molaris API key for authentication
+      MOLARIS_API_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjRmMjIzZWIzLTJlNzEtNGQ3Zi1iZGUyLTU1Yjg3ZWQwOTg1NyIsIm9yZ0lkIjoiNDI2MzM5IiwidXNlcklkIjoiNDM4NTI2IiwidHlwZUlkIjoiOTQ5NjVmYWQtMzgxZS00MWNjLWJiYjgtZTE2NTBkNDk4ZDgyIiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3MzcxOTEwNjYsImV4cCI6NDg5Mjk1MTA2Nn0.0d1wSwB0HwGiKCgiDLruSF2iDnmh6A1Xz8wKdM50zJE'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # PostgreSQL database service
+  postgres:
+    image: postgres:17 # Use PostgreSQL version 17
+    ports:
+      - '5432:5432' # Map default PostgreSQL port
+    environment:
+      # Database credentials and configuration
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=crypto_db
+    volumes:
+      # Persist database data using named volume
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Check if PostgreSQL is ready to accept connections
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s # Check every 5 seconds
+      timeout: 5s # Timeout after 5 seconds
+      retries: 5 # Retry 5 times before marking unhealthy
+    command: postgres -c 'max_connections=1000' # Allow up to 1000 concurrent connections
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: 'postgresql://postgres:postgres@postgres:5432/crypto_db'
+    command: pnpx prisma migrate deploy
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+# Define named volumes used by services
+volumes:
+  postgres_data: # Volume for persisting PostgreSQL data
