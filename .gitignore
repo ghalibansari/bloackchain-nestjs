@@ -36,7 +36,9 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # dotenv environment variable files
-.env
+# Start of Selection
+# .env # deliberately commented in gitignore.
+# End of Selection
 .env.development.local
 .env.test.local
 .env.production.local

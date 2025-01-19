@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ConversionDto, PriceType } from './price.dto';
+import { ConversionDto, PriceTypeDto } from './price.dto';
 import { PriceService } from './price.service';
 
 @ApiTags('price')
@@ -13,9 +13,10 @@ export class PriceController {
   @ApiResponse({
     status: 200,
     description: 'Returns the 24-hour price data for the specified currency',
+    type: [PriceTypeDto],
   })
   @ApiResponse({ status: 400, description: 'Invalid currency type provided' })
-  async fetchPrice24Hours(@Query() { type }: PriceType) {
+  async fetchPrice24Hours(@Query() { type }: PriceTypeDto) {
     return this.priceService.fetchPrice24Hours(type);
   }
 

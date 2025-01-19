@@ -1,12 +1,6 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
-import { CurrencyType } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { CurrencyType } from '@prisma/client';
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateAlertDto {
   @ApiProperty({
@@ -28,9 +22,8 @@ export class CreateAlertDto {
   @ApiProperty({
     description: 'The currency type for the alert',
     enum: CurrencyType,
-    example: 'ETH',
+    example: CurrencyType.ETH,
   })
-  @IsString()
   @IsEnum(CurrencyType)
   type: CurrencyType;
 }

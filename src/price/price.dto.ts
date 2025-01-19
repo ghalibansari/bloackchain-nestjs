@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { CurrencyType } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
-export class PriceType {
+export class PriceTypeDto {
   @ApiProperty({
     description: 'The currency type for the alert',
     enum: CurrencyType,

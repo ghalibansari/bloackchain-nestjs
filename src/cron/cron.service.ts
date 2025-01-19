@@ -21,6 +21,7 @@ export class CronService {
       orderBy: { timestamp: 'desc' },
     });
 
+    this.logger.log(`Last record for ${type}: ${JSON.stringify(lastRecord)}`);
     const startTime = lastRecord
       ? dayjs(lastRecord.timestamp)
       : dayjs().subtract(1, 'd');
@@ -60,6 +61,7 @@ export class CronService {
       return { ...data, type };
     });
 
+    this.logger.log(`${prices.length} ${type} saved in db`);
     await this.prisma.price.createMany({ data: prices });
   }
 
@@ -101,10 +103,18 @@ export class CronService {
   }
 
   async notifyPriceAlert(type: CurrencyType, lastPrice: number) {
-    const data = await this.prisma.alert.findMany({
-      where: { type, value: { gte: lastPrice - 0.2, lte: lastPrice + 0.2 } },
-    });
+    const where = {
+      type,
+      value: { gte: lastPrice - 0.2, lte: lastPrice + 0.2 },
+    };
+    this.logger.log(
+      `Fetching alerts for ${type} with price range: ${lastPrice - 0.2} to ${lastPrice + 0.2}`,
+    );
+    const data = await this.prisma.alert.findMany({ where });
 
+    this.logger.log(
+      `Notifying ${data.length} users about the price alert for ${type}`,
+    );
     for await (const d of data) {
       await this.emailService.sendEmail({
         to: [d.email],
