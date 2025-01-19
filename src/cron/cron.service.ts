@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CurrencyType, Prisma } from '@prisma/client';
 import axios from 'axios';
 import * as dayjs from 'dayjs';
@@ -8,6 +8,7 @@ import { ApiResponse } from './cron.type';
 
 @Injectable()
 export class CronService {
+  private readonly logger = new Logger(CronService.name);
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
@@ -68,7 +69,10 @@ export class CronService {
       orderBy: { timestamp: 'desc' },
     });
 
-    if (!currentPrice) return;
+    if (!currentPrice) {
+      this.logger.log(`Current price not found`);
+      return;
+    }
 
     // Get price from 1 hour ago
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
